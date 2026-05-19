@@ -1,0 +1,1 @@
+ Checking environment variables

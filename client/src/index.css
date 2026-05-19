@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-brand-dark text-brand-light font-body overflow-x-hidden;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  /* Date picker icon color fix for dark backgrounds */
+  input[type='date']::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+    cursor: pointer;
+  }
+
+  select option:disabled {
+    color: #999;
+  }
+}
+
+@layer components {
+  /* Reusable input style */
+  .input-base {
+    @apply w-full bg-brand-card border-2 border-brand-border text-brand-light px-4 py-3
+           font-body tracking-wide outline-none transition-colors duration-200
+           focus:border-brand-orange placeholder-brand-muted;
+  }
+
+  /* Primary button */
+  .btn-primary {
+    @apply bg-brand-orange text-brand-dark font-display tracking-widest2
+           px-8 py-3 uppercase transition-all duration-200
+           hover:bg-brand-light hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Ghost button */
+  .btn-ghost {
+    @apply border-2 border-brand-border text-brand-light font-body tracking-wide
+           px-8 py-3 uppercase transition-all duration-200
+           hover:border-brand-orange hover:text-brand-orange;
+  }
+
+  /* Section heading */
+  .section-heading {
+    @apply font-display text-brand-orange uppercase tracking-widest3
+           text-5xl md:text-7xl text-center mb-12;
+  }
+}
