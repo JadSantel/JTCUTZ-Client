@@ -20,7 +20,7 @@ if (missingEnvVars.length > 0) {
 const app = express();
 
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: process.env.CLIENT_URL || 'https://jtcutz-client.vercel.app/',
   credentials: true,
 }));
 app.use(express.json());
