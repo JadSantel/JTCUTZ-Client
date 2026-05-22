@@ -49,7 +49,6 @@ const Home = () => {
                       className="btn-secondary flex items-center justify-center gap-2"
                     >
                       FIND YOUR STYLE
-                      <Sparkles size={18} strokeWidth={2} />
                     </button>
                   </>
                 ) : (
@@ -127,7 +126,6 @@ const Home = () => {
           <div className="bg-brand-card border-2 border-brand-border p-12 md:p-16">
             <div className="max-w-2xl">
               <div className="flex items-center gap-2 mb-4">
-                <Sparkles size={16} className="text-brand-orange" strokeWidth={1.5} />
                 <span className="font-body text-xs tracking-widest uppercase text-brand-orange">
                   Need help deciding?
                 </span>
