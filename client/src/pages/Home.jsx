@@ -12,11 +12,7 @@ const Home = () => {
   const [styleModalOpen, setStyleModalOpen] = useState(false);
 
   const handleStyleClick = () => {
-    if (!user) {
-      navigate('/login');
-    } else {
-      setStyleModalOpen(true);
-    }
+    setStyleModalOpen(true);
   };
 
   return (
