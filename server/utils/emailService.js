@@ -94,7 +94,7 @@ const sendBookingConfirmation = async ({ to, name, service, date, time, notes })
       </p>`;
 
     const result = await resend.emails.send({
-      from: 'JT CUTZ <noreply@jtcutz.resend.dev>',
+      from: 'JT CUTZ <onboarding@resend.dev>',
       to,
       subject: `✂️ Appointment Confirmed — ${service} on ${formattedDate}`,
       html: htmlLayout(content),
@@ -142,7 +142,7 @@ const sendCancellationEmail = async ({ to, name, service, date, time }) => {
       </p>`;
 
     const result = await resend.emails.send({
-      from: 'JT CUTZ <noreply@jtcutz.resend.dev>',
+      from: 'JT CUTZ <onboarding@resend.dev>',
       to,
       subject: `Appointment Cancelled — ${service} on ${formattedDate}`,
       html: htmlLayout(content),
