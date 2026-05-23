@@ -1,32 +1,7 @@
-const nodemailer = require('nodemailer');
+const { Resend } = require('resend');
 
-// ── Transporter ──────────────────────────────────────────────────────────────
-const createTransporter = () => {
-  // Validate required env vars
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.error('❌ Email config error:');
-    console.error('   EMAIL_USER:', process.env.EMAIL_USER || 'NOT SET');
-    console.error('   EMAIL_PASS:', process.env.EMAIL_PASS ? '(hidden, length: ' + process.env.EMAIL_PASS.length + ')' : 'NOT SET');
-    throw new Error('Missing EMAIL_USER or EMAIL_PASS in environment variables');
-  }
-  
-  return nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_PASS,
-    },
-    tls: {
-      rejectUnauthorized: false,
-    },
-    connectionTimeout: 10000,
-    socketTimeout: 10000,
-  });
-};
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-// ── Shared HTML layout wrapper ────────────────────────────────────────────────
 const htmlLayout = (content) => `
 <!DOCTYPE html>
 <html lang="en">
@@ -71,7 +46,6 @@ const htmlLayout = (content) => `
 </body>
 </html>`;
 
-// ── Detail row helper ─────────────────────────────────────────────────────────
 const detailRow = (label, value) => `
   <tr>
     <td style="padding:12px 16px;border-bottom:1px solid #1a1a1a;">
@@ -80,11 +54,8 @@ const detailRow = (label, value) => `
     </td>
   </tr>`;
 
-// ── Send booking confirmation email ───────────────────────────────────────────
 const sendBookingConfirmation = async ({ to, name, service, date, time, notes }) => {
   try {
-    const transporter = createTransporter();
-
     const formattedDate = new Date(date).toLocaleDateString('en-PH', {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
     });
@@ -98,7 +69,6 @@ const sendBookingConfirmation = async ({ to, name, service, date, time, notes })
       <h2 style="margin:0 0 8px 0;font-size:28px;font-weight:800;color:#f5f5f5;letter-spacing:2px;text-transform:uppercase;">You're all set, ${name.split(' ')[0]}!</h2>
       <p style="margin:0 0 32px 0;font-size:14px;color:#888;line-height:1.6;">Your appointment at JT CUTZ has been confirmed. We'll see you soon — come fresh, leave fresh.</p>
 
-      <!-- Appointment details table -->
       <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-left:3px solid #eb5328;margin-bottom:32px;">
         <tbody>
           ${detailRow('Service', service)}
@@ -108,7 +78,6 @@ const sendBookingConfirmation = async ({ to, name, service, date, time, notes })
         </tbody>
       </table>
 
-      <!-- Reminder box -->
       <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border:1px solid #2a2a2a;margin-bottom:32px;">
         <tr>
           <td style="padding:20px 24px;">
@@ -124,26 +93,23 @@ const sendBookingConfirmation = async ({ to, name, service, date, time, notes })
         Need to make changes? Log in to your account at <span style="color:#eb5328;">JT CUTZ</span> and manage your appointments from your dashboard.
       </p>`;
 
-    const result = await transporter.sendMail({
-      from:    `"JT CUTZ Barbershop" <${process.env.EMAIL_USER}>`,
+    const result = await resend.emails.send({
+      from: 'JT CUTZ <onboarding@resend.dev>',
       to,
       subject: `✂️ Appointment Confirmed — ${service} on ${formattedDate}`,
-      html:    htmlLayout(content),
+      html: htmlLayout(content),
     });
 
-    console.log(`✅ Booking confirmation email sent to ${to}`, { messageId: result.messageId });
+    console.log(`✅ Booking confirmation email sent to ${to}`, { messageId: result.data?.id });
     return result;
   } catch (error) {
     console.error(`❌ Failed to send booking confirmation email to ${to}:`, error.message);
-    throw error; // Re-throw to handle in controller
+    throw error;
   }
 };
 
-// ── Send cancellation email ───────────────────────────────────────────────────
 const sendCancellationEmail = async ({ to, name, service, date, time }) => {
   try {
-    const transporter = createTransporter();
-
     const formattedDate = new Date(date).toLocaleDateString('en-PH', {
       weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
     });
@@ -153,7 +119,6 @@ const sendCancellationEmail = async ({ to, name, service, date, time }) => {
       <h2 style="margin:0 0 8px 0;font-size:28px;font-weight:800;color:#f5f5f5;letter-spacing:2px;text-transform:uppercase;">Your appointment has been cancelled</h2>
       <p style="margin:0 0 32px 0;font-size:14px;color:#888;line-height:1.6;">Hi ${name.split(' ')[0]}, the following appointment has been cancelled. We hope to see you again soon.</p>
 
-      <!-- Cancelled appointment details -->
       <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-left:3px solid #ef4444;margin-bottom:32px;">
         <tbody>
           ${detailRow('Service', service)}
@@ -163,7 +128,6 @@ const sendCancellationEmail = async ({ to, name, service, date, time }) => {
         </tbody>
       </table>
 
-      <!-- Rebook CTA -->
       <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border:1px solid #2a2a2a;margin-bottom:32px;">
         <tr>
           <td style="padding:24px;text-align:center;">
@@ -177,18 +141,18 @@ const sendCancellationEmail = async ({ to, name, service, date, time }) => {
         If you didn't cancel this appointment, please contact us as soon as possible.
       </p>`;
 
-    const result = await transporter.sendMail({
-      from:    `"JT CUTZ Barbershop" <${process.env.EMAIL_USER}>`,
+    const result = await resend.emails.send({
+      from: 'JT CUTZ <onboarding@resend.dev>',
       to,
       subject: `Appointment Cancelled — ${service} on ${formattedDate}`,
-      html:    htmlLayout(content),
+      html: htmlLayout(content),
     });
 
-    console.log(`✅ Cancellation email sent to ${to}`, { messageId: result.messageId });
+    console.log(`✅ Cancellation email sent to ${to}`, { messageId: result.data?.id });
     return result;
   } catch (error) {
     console.error(`❌ Failed to send cancellation email to ${to}:`, error.message);
-    throw error; // Re-throw to handle in controller
+    throw error;
   }
 };
 

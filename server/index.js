@@ -9,7 +9,7 @@ const authRoutes = require('./routes/auth');
 const appointmentRoutes = require('./routes/appointments');
 const galleryRoutes = require('./routes/gallery');
 
-const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET', 'EMAIL_USER', 'EMAIL_PASS'];
+const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET', 'RESEND_API_KEY'];
 const missingEnvVars = requiredEnvVars.filter((key) => !process.env[key]);
 
 if (missingEnvVars.length > 0) {
@@ -20,7 +20,7 @@ if (missingEnvVars.length > 0) {
 const app = express();
 
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'https://jtcutz-client.vercel.app/',
+  origin: process.env.CLIENT_URL || 'http://localhost:5173',
   credentials: true,
 }));
 app.use(express.json());
