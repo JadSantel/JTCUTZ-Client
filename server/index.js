@@ -20,8 +20,29 @@ if (missingEnvVars.length > 0) {
 
 const app = express();
 
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000'
+];
+
+if (process.env.CLIENT_URL) {
+  const envOrigins = process.env.CLIENT_URL.split(',').map(url => url.trim().replace(/\/$/, ''));
+  allowedOrigins.push(...envOrigins);
+}
+
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl)
+    if (!origin) return callback(null, true);
+    
+    const isAllowed = allowedOrigins.includes(origin);
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      console.warn(`CORS blocked origin: ${origin}`);
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
 }));
 app.use(express.json());
