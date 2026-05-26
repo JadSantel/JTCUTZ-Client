@@ -93,12 +93,17 @@ const sendBookingConfirmation = async ({ to, name, service, date, time, notes })
         Need to make changes? Log in to your account at <span style="color:#eb5328;">JT CUTZ</span> and manage your appointments from your dashboard.
       </p>`;
 
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'JT CUTZ <onboarding@resend.dev>';
     const result = await resend.emails.send({
-      from: 'JT CUTZ <onboarding@resend.dev>',
+      from: fromEmail,
       to,
       subject: `✂️ Appointment Confirmed — ${service} on ${formattedDate}`,
       html: htmlLayout(content),
     });
+
+    if (result.error) {
+      throw new Error(result.error.message || JSON.stringify(result.error));
+    }
 
     console.log(`✅ Booking confirmation email sent to ${to}`, { messageId: result.data?.id });
     return result;
@@ -141,12 +146,17 @@ const sendCancellationEmail = async ({ to, name, service, date, time }) => {
         If you didn't cancel this appointment, please contact us as soon as possible.
       </p>`;
 
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'JT CUTZ <onboarding@resend.dev>';
     const result = await resend.emails.send({
-      from: 'JT CUTZ <onboarding@resend.dev>',
+      from: fromEmail,
       to,
       subject: `Appointment Cancelled — ${service} on ${formattedDate}`,
       html: htmlLayout(content),
     });
+
+    if (result.error) {
+      throw new Error(result.error.message || JSON.stringify(result.error));
+    }
 
     console.log(`✅ Cancellation email sent to ${to}`, { messageId: result.data?.id });
     return result;
