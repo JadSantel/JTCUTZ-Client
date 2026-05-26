@@ -11,10 +11,10 @@ const StyleSelector = ({ isOpen, onClose }) => {
 
   const faceShapes = [
     { id: 'round', label: 'Round Face', icon: '◯' },
-    { id: 'oval', label: 'Oval Face', icon: '▭' },
+    { id: 'oval', label: 'Oval Face', icon: '⬭' },
     { id: 'square', label: 'Square Face', icon: '▢' },
-    { id: 'heart', label: 'Heart Face', icon: '♥' },
-    { id: 'oblong', label: 'Oblong Face', icon: '▬' },
+    { id: 'heart', label: 'Heart Face', icon: '♡' },
+    { id: 'oblong', label: 'Rectangle Face', icon: '▭' },
   ];
 
   const maintenanceLevels = [
