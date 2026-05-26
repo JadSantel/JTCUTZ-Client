@@ -122,4 +122,43 @@ const getMe = async (req, res) => {
   });
 };
 
-module.exports = { register, login, getMe };
+const changePassword = async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+
+  if (!currentPassword || !newPassword) {
+    return res.status(400).json({ success: false, message: 'Please provide current and new passwords' });
+  }
+
+  if (newPassword.length < 6) {
+    return res.status(400).json({ success: false, message: 'New password must be at least 6 characters' });
+  }
+
+  if (currentPassword === newPassword) {
+    return res.status(400).json({ success: false, message: 'New password must be different from current password' });
+  }
+
+  try {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    const isMatch = await user.matchPassword(currentPassword);
+    if (!isMatch) {
+      return res.status(400).json({ success: false, message: 'Current password is incorrect' });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    return res.json({ success: true, message: 'Password changed successfully' });
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+
+    return sendServerError(res, error, 'Change password');
+  }
+};
+
+module.exports = { register, login, getMe, changePassword };

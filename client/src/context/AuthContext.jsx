@@ -50,6 +50,11 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  const changePassword = async (currentPassword, newPassword) => {
+    const { data } = await api.patch('/auth/password', { currentPassword, newPassword });
+    return data;
+  };
+
   const logout = () => {
     localStorage.removeItem('jtcutz_token');
     localStorage.removeItem('jtcutz_user');
@@ -59,7 +64,7 @@ export const AuthProvider = ({ children }) => {
   const isAdmin = user?.role === 'admin';
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAdmin, register, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin, register, login, changePassword, logout }}>
       {children}
     </AuthContext.Provider>
   );
