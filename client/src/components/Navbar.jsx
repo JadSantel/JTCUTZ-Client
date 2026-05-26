@@ -54,11 +54,13 @@ const Navbar = () => {
             <>
               {navLink('/admin', 'Admin Panel')}
               {navLink('/admin/appointments', 'All Appointments')}
+              {navLink('/account/password', 'Password')}
             </>
           ) : (
             <>
               {navLink('/dashboard', 'Dashboard')}
               {navLink('/dashboard/book', 'Book Appointment')}
+              {navLink('/account/password', 'Password')}
             </>
           )}
         </div>
@@ -128,11 +130,13 @@ const Navbar = () => {
             <>
               {navLink('/admin', 'Admin Panel')}
               {navLink('/admin/appointments', 'All Appointments')}
+              {navLink('/account/password', 'Password')}
             </>
           ) : (
             <>
               {navLink('/dashboard', 'Dashboard')}
               {navLink('/dashboard/book', 'Book Appointment')}
+              {navLink('/account/password', 'Password')}
             </>
           )}
           <div className="h-px bg-brand-border" />

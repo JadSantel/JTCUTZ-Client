@@ -8,6 +8,7 @@ import Register         from './pages/Register';
 import Dashboard        from './pages/Dashboard';
 import AdminDashboard   from './pages/AdminDashboard';
 import BookAppointment  from './pages/BookAppointment';
+import ChangePassword   from './pages/ChangePassword';
 
 const App = () => {
   return (
@@ -33,6 +34,14 @@ const App = () => {
             element={
               <ProtectedRoute>
                 <BookAppointment />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/account/password"
+            element={
+              <ProtectedRoute>
+                <ChangePassword />
               </ProtectedRoute>
             }
           />
