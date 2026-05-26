@@ -1,25 +1,6 @@
 const { Resend } = require('resend');
 
 const resend = new Resend(process.env.RESEND_API_KEY);
-const RESEND_DEV_FROM_RE = /@resend\.dev\s*>?$/i;
-
-const getFromEmail = () => {
-  const fromEmail = process.env.RESEND_FROM_EMAIL?.trim();
-
-  if (!fromEmail) {
-    throw new Error(
-      'RESEND_FROM_EMAIL is missing. Set it to a sender on your verified Resend domain, for example: JT CUTZ <bookings@yourdomain.com>'
-    );
-  }
-
-  if (RESEND_DEV_FROM_RE.test(fromEmail)) {
-    throw new Error(
-      'RESEND_FROM_EMAIL is still using resend.dev. Use an email address from your verified Resend domain.'
-    );
-  }
-
-  return fromEmail;
-};
 
 const htmlLayout = (content) => `
 <!DOCTYPE html>
@@ -112,8 +93,9 @@ const sendBookingConfirmation = async ({ to, name, service, date, time, notes })
         Need to make changes? Log in to your account at <span style="color:#eb5328;">JT CUTZ</span> and manage your appointments from your dashboard.
       </p>`;
 
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'JT CUTZ <onboarding@resend.dev>';
     const result = await resend.emails.send({
-      from: getFromEmail(),
+      from: fromEmail,
       to,
       subject: `✂️ Appointment Confirmed — ${service} on ${formattedDate}`,
       html: htmlLayout(content),
@@ -164,8 +146,9 @@ const sendCancellationEmail = async ({ to, name, service, date, time }) => {
         If you didn't cancel this appointment, please contact us as soon as possible.
       </p>`;
 
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'JT CUTZ <onboarding@resend.dev>';
     const result = await resend.emails.send({
-      from: getFromEmail(),
+      from: fromEmail,
       to,
       subject: `Appointment Cancelled — ${service} on ${formattedDate}`,
       html: htmlLayout(content),
