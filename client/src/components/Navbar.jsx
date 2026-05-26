@@ -50,18 +50,19 @@ const Navbar = () => {
         {/* Desktop nav */}
         <div className="hidden md:flex items-center gap-8">
           {user && navLink('/', 'Home')}
-          {isAdmin ? (
-            <>
-              {navLink('/admin', 'Admin Panel')}
-              {navLink('/admin/appointments', 'All Appointments')}
-              {navLink('/account/password', 'Password')}
-            </>
-          ) : (
-            <>
-              {navLink('/dashboard', 'Dashboard')}
-              {navLink('/dashboard/book', 'Book Appointment')}
-              {navLink('/account/password', 'Password')}
-            </>
+          {user && (
+            isAdmin ? (
+              <>
+                {navLink('/admin', 'Admin Panel')}
+                {navLink('/account/password', 'Password')}
+              </>
+            ) : (
+              <>
+                {navLink('/dashboard', 'Dashboard')}
+                {navLink('/dashboard/book', 'Book Appointment')}
+                {navLink('/account/password', 'Password')}
+              </>
+            )
           )}
         </div>
 
@@ -126,18 +127,19 @@ const Navbar = () => {
         <div className="md:hidden bg-brand-card border-t border-brand-border px-6 py-6
                         flex flex-col gap-5">
           {user && navLink('/', 'Home')}
-          {isAdmin ? (
-            <>
-              {navLink('/admin', 'Admin Panel')}
-              {navLink('/admin/appointments', 'All Appointments')}
-              {navLink('/account/password', 'Password')}
-            </>
-          ) : (
-            <>
-              {navLink('/dashboard', 'Dashboard')}
-              {navLink('/dashboard/book', 'Book Appointment')}
-              {navLink('/account/password', 'Password')}
-            </>
+          {user && (
+            isAdmin ? (
+              <>
+                {navLink('/admin', 'Admin Panel')}
+                {navLink('/account/password', 'Password')}
+              </>
+            ) : (
+              <>
+                {navLink('/dashboard', 'Dashboard')}
+                {navLink('/dashboard/book', 'Book Appointment')}
+                {navLink('/account/password', 'Password')}
+              </>
+            )
           )}
           <div className="h-px bg-brand-border" />
           {user ? (

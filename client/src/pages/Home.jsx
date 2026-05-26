@@ -62,7 +62,6 @@ const Home = () => {
                       className="btn-secondary flex items-center justify-center gap-2"
                     >
                       FIND YOUR STYLE
-                      <Sparkles size={18} strokeWidth={2} />
                     </button>
                   </>
                 )}
