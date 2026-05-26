@@ -6,6 +6,7 @@ const {
   getAvailableSlots,
   getMyAppointments,
   getAllAppointments,
+  completeAppointment,
   cancelAppointment,
 } = require('../controllers/appointmentController');
 
@@ -16,6 +17,7 @@ router.get('/slots',          protect,             getAvailableSlots);
 router.post('/',              protect,             createAppointment);
 router.get('/my',             protect,             getMyAppointments);
 router.patch('/:id/cancel',   protect,             cancelAppointment);
+router.patch('/:id/complete', protect, adminOnly,  completeAppointment);
 
 // Admin routes
 router.get('/all',            protect, adminOnly,  getAllAppointments);

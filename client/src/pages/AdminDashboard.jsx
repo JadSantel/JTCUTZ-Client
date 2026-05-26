@@ -49,6 +49,21 @@ const AdminDashboard = () => {
     }
   };
 
+  const handleComplete = async (id) => {
+    if (!confirm('Mark this appointment as completed?')) return;
+    try {
+      const { data } = await api.patch(`/appointments/${id}/complete`);
+      if (data.success) {
+        setSuccessMsg('Appointment marked completed.');
+        fetchAll();
+        setTimeout(() => setSuccessMsg(''), 3000);
+      }
+    } catch {
+      setError('Could not mark completed. Please try again.');
+      setTimeout(() => setError(''), 3000);
+    }
+  };
+
   // Apply filter + search
   const filtered = appointments
     .filter((a) => filter === 'all' || a.status === filter)
@@ -177,6 +192,7 @@ const AdminDashboard = () => {
                 key={a._id}
                 appointment={a}
                 onCancel={handleCancel}
+                onComplete={handleComplete}
                 showUser
               />
             ))}

@@ -1,4 +1,4 @@
-import { Calendar, Clock, Scissors, User, XCircle } from 'lucide-react';
+import { Calendar, CheckCircle, Clock, Scissors, User, XCircle } from 'lucide-react';
 
 const STATUS_STYLES = {
   upcoming: { dot: 'bg-green-400', text: 'text-green-400', label: 'Upcoming' },
@@ -6,7 +6,7 @@ const STATUS_STYLES = {
   cancelled: { dot: 'bg-red-500', text: 'text-red-400', label: 'Cancelled' },
 };
 
-const AppointmentCard = ({ appointment, onCancel, showUser = false }) => {
+const AppointmentCard = ({ appointment, onCancel, onComplete, showUser = false }) => {
   const { _id, date, time, service, status, notes, userId } = appointment;
   const s = STATUS_STYLES[status] || STATUS_STYLES.upcoming;
 
@@ -26,14 +26,27 @@ const AppointmentCard = ({ appointment, onCancel, showUser = false }) => {
             {s.label}
           </span>
         </div>
-        {status === 'upcoming' && onCancel && (
-          <button
-            onClick={() => onCancel(_id)}
-            className="flex items-center gap-1.5 font-body text-xs tracking-wide text-brand-muted hover:text-red-400 transition-colors duration-200"
-          >
-            <XCircle size={14} strokeWidth={1.5} />
-            Cancel
-          </button>
+        {status === 'upcoming' && (onComplete || onCancel) && (
+          <div className="flex items-center gap-3">
+            {onComplete && (
+              <button
+                onClick={() => onComplete(_id)}
+                className="flex items-center gap-1.5 font-body text-xs tracking-wide text-brand-muted hover:text-green-400 transition-colors duration-200"
+              >
+                <CheckCircle size={14} strokeWidth={1.5} />
+                Complete
+              </button>
+            )}
+            {onCancel && (
+              <button
+                onClick={() => onCancel(_id)}
+                className="flex items-center gap-1.5 font-body text-xs tracking-wide text-brand-muted hover:text-red-400 transition-colors duration-200"
+              >
+                <XCircle size={14} strokeWidth={1.5} />
+                Cancel
+              </button>
+            )}
+          </div>
         )}
       </div>
 
