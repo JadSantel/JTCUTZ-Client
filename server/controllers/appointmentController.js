@@ -9,6 +9,45 @@ const TIME_SLOTS = [
   '4:00 PM',  '4:30 PM',  '5:00 PM',
 ];
 
+const parseAppointmentDateTime = (date, time) => {
+  const appointmentDate = new Date(date);
+  const match = /^(\d{1,2}):(\d{2})\s?(AM|PM)$/i.exec(time || '');
+
+  if (isNaN(appointmentDate) || !match) return null;
+
+  let hours = Number(match[1]);
+  const minutes = Number(match[2]);
+  const period = match[3].toUpperCase();
+
+  if (period === 'PM' && hours !== 12) hours += 12;
+  if (period === 'AM' && hours === 12) hours = 0;
+
+  appointmentDate.setHours(hours, minutes, 0, 0);
+  return appointmentDate;
+};
+
+const isAppointmentPast = (appointment, now = new Date()) => {
+  const appointmentDateTime = parseAppointmentDateTime(appointment.date, appointment.time);
+  return appointmentDateTime ? appointmentDateTime < now : false;
+};
+
+const completePastAppointments = async () => {
+  const upcomingAppointments = await Appointment.find({ status: 'upcoming' }).select('date time');
+  const now = new Date();
+  const pastIds = upcomingAppointments
+    .filter((appointment) => isAppointmentPast(appointment, now))
+    .map((appointment) => appointment._id);
+
+  if (pastIds.length === 0) return 0;
+
+  const result = await Appointment.updateMany(
+    { _id: { $in: pastIds }, status: 'upcoming' },
+    { $set: { status: 'completed' } }
+  );
+
+  return result.modifiedCount || 0;
+};
+
 // @desc    Create a new appointment
 // @route   POST /api/appointments
 // @access  Private
@@ -32,6 +71,15 @@ const createAppointment = async (req, res) => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
   if (appointmentDate < today) {
+    return res.status(400).json({ success: false, message: 'Cannot book appointments in the past' });
+  }
+
+  const appointmentDateTime = parseAppointmentDateTime(appointmentDate, time);
+  if (!appointmentDateTime) {
+    return res.status(400).json({ success: false, message: 'Invalid appointment time' });
+  }
+
+  if (appointmentDateTime < new Date()) {
     return res.status(400).json({ success: false, message: 'Cannot book appointments in the past' });
   }
 
@@ -99,6 +147,8 @@ const getAvailableSlots = async (req, res) => {
   }
 
   try {
+    await completePastAppointments();
+
     const startOfDay = new Date(date);
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(date);
@@ -109,9 +159,16 @@ const getAvailableSlots = async (req, res) => {
       status: 'upcoming',
     }).select('time');
 
-    const takenSlots = booked.map((a) => a.time);
+    const takenSlots = new Set(booked.map((a) => a.time));
+    const now = new Date();
+    TIME_SLOTS.forEach((slot) => {
+      const slotDateTime = parseAppointmentDateTime(startOfDay, slot);
+      if (slotDateTime && slotDateTime < now) {
+        takenSlots.add(slot);
+      }
+    });
 
-    res.json({ success: true, takenSlots });
+    res.json({ success: true, takenSlots: [...takenSlots] });
   } catch (error) {
     console.error('getAvailableSlots error:', error);
     res.status(500).json({ success: false, message: 'Server error' });
@@ -123,6 +180,8 @@ const getAvailableSlots = async (req, res) => {
 // @access  Private
 const getMyAppointments = async (req, res) => {
   try {
+    await completePastAppointments();
+
     const appointments = await Appointment.find({ userId: req.user._id })
       .sort({ date: -1, createdAt: -1 });
 
@@ -138,6 +197,8 @@ const getMyAppointments = async (req, res) => {
 // @access  Private/Admin
 const getAllAppointments = async (req, res) => {
   try {
+    await completePastAppointments();
+
     const appointments = await Appointment.find()
       .populate('userId', 'name email phone')
       .sort({ date: -1, createdAt: -1 });
@@ -145,6 +206,35 @@ const getAllAppointments = async (req, res) => {
     res.json({ success: true, appointments });
   } catch (error) {
     console.error('getAllAppointments error:', error);
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+// @desc    Mark an appointment as completed
+// @route   PATCH /api/appointments/:id/complete
+// @access  Private/Admin
+const completeAppointment = async (req, res) => {
+  try {
+    const appointment = await Appointment.findById(req.params.id);
+
+    if (!appointment) {
+      return res.status(404).json({ success: false, message: 'Appointment not found' });
+    }
+
+    if (appointment.status === 'completed') {
+      return res.status(400).json({ success: false, message: 'Already completed' });
+    }
+
+    if (appointment.status === 'cancelled') {
+      return res.status(400).json({ success: false, message: 'Cannot complete a cancelled appointment' });
+    }
+
+    appointment.status = 'completed';
+    await appointment.save();
+
+    res.json({ success: true, message: 'Appointment completed', appointment });
+  } catch (error) {
+    console.error('completeAppointment error:', error);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
@@ -206,5 +296,7 @@ module.exports = {
   getAvailableSlots,
   getMyAppointments,
   getAllAppointments,
+  completeAppointment,
+  completePastAppointments,
   cancelAppointment,
 };
