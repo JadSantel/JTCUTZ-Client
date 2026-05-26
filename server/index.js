@@ -10,7 +10,7 @@ const appointmentRoutes = require('./routes/appointments');
 const galleryRoutes = require('./routes/gallery');
 const { completePastAppointments } = require('./controllers/appointmentController');
 
-const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET', 'RESEND_API_KEY'];
+const requiredEnvVars = ['MONGO_URI', 'JWT_SECRET', 'RESEND_API_KEY', 'RESEND_FROM_EMAIL'];
 const missingEnvVars = requiredEnvVars.filter((key) => !process.env[key]);
 
 if (missingEnvVars.length > 0) {
