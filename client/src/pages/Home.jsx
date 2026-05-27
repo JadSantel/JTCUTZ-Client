@@ -134,7 +134,7 @@ const Home = () => {
               </h3>
               <p className="font-body text-lg text-brand-light/70 tracking-wide mb-8">
                 Answer 3 simple questions about your face shape, maintenance preference, and product
-                use. Our AI-powered tool will recommend the perfect style for you.
+                use. This helpful tool will recommend the perfect style for you.
               </p>
               <button
                 onClick={handleStyleClick}
