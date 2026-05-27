@@ -5,7 +5,13 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "test:performance": "k6 run perf-test-main.js",
+    "test:performance:smoke": "k6 run --vus 5 --duration 30s perf-test-main.js",
+    "test:performance:load": "k6 run --vus 50 --duration 2m perf-test-main.js",
+    "test:performance:stress": "k6 run --vus 100 --duration 5m perf-test-main.js",
+    "test:performance:spike": "k6 run perf-test-spike.js",
+    "test:performance:report": "k6 run --out json=performance-report.json perf-test-main.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",
@@ -14,7 +20,7 @@
     "express": "^4.19.2",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.4.1",
-    "resend": "^3.0.0"
+    "resend": "^3.5.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.3"
