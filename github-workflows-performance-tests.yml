@@ -1,0 +1,80 @@
+name: Performance Tests
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: '0 2 * * *'
+
+jobs:
+  performance-tests:
+    runs-on: ubuntu-latest
+    
+    services:
+      mongodb:
+        image: mongo:latest
+        options: >-
+          --health-cmd mongosh
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 27017:27017
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install K6
+        run: |
+          sudo apt-key adv --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb https://dl.k6.io/deb stable main" | sudo tee /etc/apt/sources.list.d/k6-stable.list
+          sudo apt-get update
+          sudo apt-get install k6
+
+      - name: Install dependencies
+        working-directory: ./server
+        run: npm install
+
+      - name: Start API server
+        working-directory: ./server
+        env:
+          MONGO_URI: mongodb://localhost:27017/jtcutz-test
+          JWT_SECRET: test-secret-key
+          RESEND_API_KEY: test-key
+          PORT: 5000
+        run: npm start &
+        
+      - name: Wait for server to start
+        run: |
+          sleep 5
+          curl -f http://localhost:5000/api/health || exit 1
+
+      - name: Run smoke tests
+        working-directory: ./server
+        run: npm run test:performance:smoke
+        continue-on-error: true
+
+      - name: Run load tests
+        working-directory: ./server
+        run: npm run test:performance:load
+
+      - name: Generate performance report
+        working-directory: ./server
+        run: npm run test:performance:report
+        if: always()
+
+      - name: Upload performance report
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: performance-report
+          path: server/performance-report.json
